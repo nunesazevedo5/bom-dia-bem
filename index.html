@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <title>Um bom dia para minha flor</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #4b3025;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Georgia, serif;
+      color: #65452e;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    .convite {
+      position: relative;
+      width: 90%;
+      max-width: 360px;
+      min-height: 420px;
+      padding: 20px 18px;
+      background: #ead8b8;
+      border: 1px solid #b18b5e;
+      outline: 1px solid #b18b5e;
+      outline-offset: -9px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      box-shadow: 0 12px 35px #20130e66;
+      background-image: url("moldura.jpeg");
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Mensagem e páginas */
+
+    .mensagem {
+      width: 100%;
+      margin: 0 auto;
+      padding: 12px;
+      color: #69452f;
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.5;
+      display: grid;
+    }
+
+    .pagina {
+      display: none;
+      grid-area: 1 / 1;
+      min-height: 400px;
+      transform: translateY(6%);
+      animation: aparecer 0.5s ease;
+    }
+
+    .pagina.ativa {
+      display: block;
+    }
+
+    .titulo-carta {
+      text-align: center;
+      font-family: Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: normal;
+      color: #69472f;
+      margin: 0 0 22px;
+      line-height: 1.4;
+    }
+
+    .pagina p {
+      text-align: justify;
+      line-height: 1.5;
+      margin: 0 0 18px;
+    }
+
+    .encerramento {
+      text-align: center !important;
+      font-family: Georgia, serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      color: #80512e;
+      margin-top: 24px;
+    }
+
+    /* Navegação */
+
+    .navegacao {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .navegacao button {
+      border: 1px solid #987454;
+      background: #f4ead9;
+      color: #69452f;
+      padding: 9px 12px;
+      border-radius: 20px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .navegacao button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    #contador {
+      font-size: 13px;
+    }
+
+    /* Quinta página e lírio */
+
+    .pagina-final {
+      display: none;
+      grid-area: 1 / 1;
+      min-height: 400px;
+      transform: translateY(6%);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      animation: aparecer 0.6s ease;
+    }
+
+    .pagina-final.ativa {
+      display: flex;
+    }
+
+    .texto-final {
+      font-size: 18px;
+      line-height: 1.6;
+      font-style: italic;
+      color: #69452f;
+      text-align: center;
+    }
+
+    .flor-botao {
+      width: 90px;
+      height: 90px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+    }
+
+    .flor-botao img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 3px 4px #543b2830);
+    }
+
+    .flor-botao:hover {
+      transform: scale(1.08) rotate(5deg);
+    }
+
+    .flor-botao:focus-visible {
+      outline: 2px solid #987454;
+      outline-offset: 5px;
+      border-radius: 50%;
+    }
+
+    /* Mensagens da cantada */
+
+    .cena-cantada {
+      display: none;
+      grid-area: 1 / 1;
+      min-height: 400px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 18px;
+      transform: translateY(6%);
+      text-align: center;
+    }
+
+    .cena-cantada.ativa {
+      display: flex;
+    }
+
+    .mensagem-cantada {
+      font-size: 19px;
+      line-height: 1.65;
+      color: #69452f;
+      font-style: italic;
+      opacity: 0;
+      animation: surgir 0.7s ease forwards;
+    }
+
+    .mensagem-cantada.oculta {
+      display: none;
+    }
+
+    .ornamento {
+      color: #987454;
+      font-size: 18px;
+    }
+
+    /* Chuva de flores */
+
+    .chuva {
+      position: fixed;
+      top: -80px;
+      pointer-events: none;
+      z-index: 5;
+      animation: cair linear forwards;
+    }
+
+    .chuva img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 2px #543b2830);
+    }
+
+    /* Animações */
+
+    @keyframes cair {
+      to {
+        transform: translateY(110vh) rotate(540deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes aparecer {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(6%);
+      }
+    }
+
+    @keyframes surgir {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (min-width: 481px) {
+      .mensagem {
+        font-size: 18px;
+        line-height: 1.6;
+        padding: 20px;
+      }
+
+      .pagina p {
+        line-height: 1.65;
+      }
+
+      .navegacao button {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .convite {
+        min-height: 420px;
+        padding: 20px 18px;
+      }
+
+      .titulo-carta {
+        font-size: 1.25rem;
+      }
+
+      .mensagem-cantada {
+        font-size: 17px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    .sticker-seduzindo {
+  display: block;
+  width: 180px;
+  max-width: 75%;
+  height: auto;
+  margin: 18px auto 0;
+  border-radius: 10px;
+  animation: aparecerSticker 0.8s ease both;
+}
+
+@keyframes aparecerSticker {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+  </style>
+</head>
+
+<body>
+
+  <main class="convite">
+
+    <!-- Primeira parte: carta -->
+
+    <div class="mensagem" id="mensagemCarta">
+
+      <div class="pagina ativa">
+        <h2 class="titulo-carta">
+          Bom diaaa, minha linda! ♡
+        </h2>
+
+        <p>
+          Espero que tenha dormido bem e que seu dia comece com a mesma leveza e alegria que você tantas vezes transmite.
+
+          Sabe, uma das coisas que mais admiro em você é esse seu jeitinho de enxergar a vida, de encontrar beleza nos pequenos detalhes e de tornar especiais até os momentos mais simples.
+
+          Gosto da maneira como você é, da sua essência, do seu coração e de tudo aquilo que faz de você alguém tão única.
+        </p>
+      </div>
+
+      <div class="pagina">
+        <p>
+          E, claro, não posso deixar de falar desse sorriso que tanto amo e desse olhar tão seu, que parece encontrar beleza até onde ninguém mais percebe.
+
+          Se eu pudesse escolher onde estar agora, seria aí, pertinho de você, fazendo cafuné, te enchendo de carinho e lembrando o quanto você é preciosa.
+
+          Queria poder te proporcionar dias leves, ser motivo de algumas das suas risadinhas e estar ao seu lado não só nos momentos bonitos, mas também naqueles em que tudo o que você precisa é de um pouco de paz e aconchego.
+        </p>
+      </div>
+
+      <div class="pagina">
+        <p>
+          Afinal, conhecer você e ter a oportunidade de fazer parte da sua vida é um presente pelo qual agradeço a Deus.
+
+          E, se existe algo que eu desejo de coração, é que você nunca se esqueça do quanto merece ser feliz e de como é especial para mim. ♡
+
+          Que o Senhor abençoe seu dia, guie seus passos e esteja presente em tudo aquilo a que você se propuser. Que não lhe faltem forças para os desafios, motivos para sorrir e a tranquilidade de saber que você não precisa enfrentar tudo sozinha.
+        </p>
+      </div>
+
+      <div class="pagina">
+        <p>
+          Estarei sempre torcendo pelo seu bem e desejando que a vida seja gentil com esse coração tão precioso.
+
+          Tenha um dia maravilhoso, cheio da graça e das bênçãos do nosso Senhor.
+
+          E receba, de longe, um beijo carregadinho de carinho, daqueles que levam um pouquinho de saudade e todo o aconchego de um abraço que eu adoraria te dar agora.
+        </p>
+
+        <p class="encerramento">
+          Um beijoooo, minha flor! ♡
+          <br>
+          ⋆⊱༻𖥸༺⊰⋆
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Quinta página: lírio e mensagem -->
+
+    <section class="pagina-final" id="paginaFinal">
+
+      <p class="texto-final">
+        Calma, ainda tem mais uma coisinha...
+      </p>
+
+      <button
+        class="flor-botao"
+        id="botaoFlor"
+        aria-label="Ver a próxima mensagem">
+        <img src="lirio.png" alt="Lírio">
+      </button>
+
+    </section>
+
+    <!-- Cena da cantada -->
+
+    <section class="cena-cantada" id="cenaCantada">
+
+      <p class="mensagem-cantada" id="primeiraCantada">
+        Tava pensando aqui...
+      </p>
+
+      <p class="mensagem-cantada oculta" id="segundaCantada">
+        Esse ano é de eleição, então queria saber se posso me candidatar pra ser o amor da sua vida. ♡
+        <img
+  src="sticker-seduzindo.jpeg"
+  alt="Cachorrinho te seduzindo"
+  class="sticker-seduzindo"
+/>
+      </p>
+
+      <span class="ornamento">⋆⊱༻𖥸༺⊰⋆</span>
+
+    </section>
+
+    <!-- Navegação -->
+
+    <div class="navegacao" id="navegacao">
+
+      <button id="anterior" disabled>
+        ← Anterior
+      </button>
+
+      <span id="contador">1 / 5</span>
+
+      <button id="proxima">
+        Próxima página →
+      </button>
+
+    </div>
+
+    <!-- Áudios -->
+
+    <audio id="musicaInicial" loop preload="auto">
+      <source src="here-comes-the-sun.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="musicaSegunda" loop preload="auto">
+      <source src="only-over-you.mp3" type="audio/mpeg">
+    </audio>
+
+  </main>
+
+  <script>
+    // Chuva de 21 flores
+
+    const flores = Array.from(
+      { length: 21 },
+      (_, i) => `flores/flor${i + 1}.png`
+    );
+
+    function criarFlor() {
+      const flor = document.createElement("span");
+      flor.classList.add("chuva");
+
+      const imagem = document.createElement("img");
+      const indice = Math.floor(Math.random() * flores.length);
+
+      imagem.src = flores[indice];
+      imagem.alt = "";
+
+      flor.appendChild(imagem);
+
+      const tamanho = 35 + Math.random() * 45;
+      const duracao = 5 + Math.random() * 6;
+
+      flor.style.left = Math.random() * 100 + "vw";
+      flor.style.width = tamanho + "px";
+      flor.style.height = tamanho + "px";
+      flor.style.animationDuration = duracao + "s";
+
+      document.body.appendChild(flor);
+
+      setTimeout(() => {
+        flor.remove();
+      }, duracao * 1000);
+    }
+
+    setInterval(criarFlor, 350);
+
+
+    // Elementos da navegação
+
+    const paginas = document.querySelectorAll(".pagina");
+    const paginaFinal = document.getElementById("paginaFinal");
+    const mensagemCarta = document.getElementById("mensagemCarta");
+
+    const botaoAnterior = document.getElementById("anterior");
+    const botaoProxima = document.getElementById("proxima");
+    const contador = document.getElementById("contador");
+    const navegacao = document.getElementById("navegacao");
+
+    const totalPaginas = paginas.length + 1;
+    let paginaAtual = 0;
+    let cenaFinalAberta = false;
+
+    function mostrarPagina() {
+      paginas.forEach((pagina, indice) => {
+        pagina.classList.toggle("ativa", indice === paginaAtual);
+      });
+
+      const estaNaCarta = paginaAtual < paginas.length;
+
+      mensagemCarta.style.display = estaNaCarta ? "grid" : "none";
+      paginaFinal.classList.toggle("ativa", !estaNaCarta);
+
+      botaoAnterior.disabled = paginaAtual === 0;
+      botaoProxima.disabled = paginaAtual === totalPaginas - 1;
+
+      contador.textContent =
+        `${paginaAtual + 1} / ${totalPaginas}`;
+    }
+
+    botaoProxima.addEventListener("click", () => {
+      if (paginaAtual < totalPaginas - 1) {
+        paginaAtual++;
+        mostrarPagina();
+        iniciarMusicaInicial();
+      }
+    });
+
+    botaoAnterior.addEventListener("click", () => {
+      if (paginaAtual > 0) {
+        paginaAtual--;
+        mostrarPagina();
+        iniciarMusicaInicial();
+      }
+    });
+
+
+    // Músicas
+
+    const musicaInicial = document.getElementById("musicaInicial");
+    const musicaSegunda = document.getElementById("musicaSegunda");
+
+    musicaInicial.volume = 0.7;
+    musicaSegunda.volume = 0;
+
+    let musicaIniciada = false;
+    let transicaoEmAndamento = false;
+
+    async function iniciarMusicaInicial() {
+      if (musicaIniciada) return;
+
+      try {
+        await musicaInicial.play();
+        musicaIniciada = true;
+      } catch (erro) {
+        // O navegador pode exigir uma interação do usuário.
+      }
+    }
+
+    // Tenta iniciar ao carregar.
+    iniciarMusicaInicial();
+
+
+    async function trocarMusica() {
+      if (transicaoEmAndamento) return;
+
+      transicaoEmAndamento = true;
+
+      try {
+        musicaSegunda.currentTime = 0;
+        musicaSegunda.volume = 0;
+
+        await musicaSegunda.play();
+
+        const duracao = 5000;
+        const intervalo = 100;
+        const passos = duracao / intervalo;
+        let passo = 0;
+
+        const volumeInicial = musicaInicial.volume;
+
+        const transicao = setInterval(() => {
+          passo++;
+
+          const progresso = Math.min(passo / passos, 1);
+
+          musicaInicial.volume =
+            volumeInicial * (1 - progresso);
+
+          musicaSegunda.volume =
+            0.7 * progresso;
+
+          if (progresso >= 1) {
+            clearInterval(transicao);
+
+            musicaInicial.pause();
+            musicaInicial.currentTime = 0;
+            transicaoEmAndamento = false;
+          }
+        }, intervalo);
+
+      } catch (erro) {
+        // Se a segunda música não puder iniciar,
+        // mantém a primeira tocando.
+
+        transicaoEmAndamento = false;
+      }
+    }
+
+
+    // Clique no lírio: inicia a sequência da cantada
+
+    const botaoFlor = document.getElementById("botaoFlor");
+    const cenaCantada = document.getElementById("cenaCantada");
+    const primeiraCantada = document.getElementById("primeiraCantada");
+    const segundaCantada = document.getElementById("segundaCantada");
+
+    botaoFlor.addEventListener("click", async () => {
+      if (cenaFinalAberta) return;
+
+      cenaFinalAberta = true;
+
+      await iniciarMusicaInicial();
+      trocarMusica();
+
+      // Esconde a quinta página e a navegação.
+      paginaFinal.classList.remove("ativa");
+      navegacao.style.display = "none";
+
+      // Mostra a primeira parte da cantada.
+      cenaCantada.classList.add("ativa");
+
+      // Aguarda a primeira frase aparecer e ser lida.
+      setTimeout(() => {
+        primeiraCantada.classList.add("oculta");
+
+        // Pequena pausa para a transição.
+        setTimeout(() => {
+          segundaCantada.classList.remove("oculta");
+        }, 600);
+
+      }, 3000);
+    });
+
+    mostrarPagina();
+  </script>
+
+</body>
+</html>
